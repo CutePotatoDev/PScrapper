@@ -1,12 +1,11 @@
 import logging
 import signal
-import sys
-from time import time, sleep
+from time import time
 from multiprocessing import Queue
 from multiprocessing import Process
 from threading import Thread, current_thread, Event
-from webkit.web import WebPage
-from webkit.gui import MainWindow
+from util.webkit.web import WebPage
+from util.webkit.gui import MainWindow
 from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer

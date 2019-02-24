@@ -1,5 +1,5 @@
 import logging
-from webkit.webkit import WebKit
+from util.webkit.webkit import WebKit
 
 
 log = logging.getLogger("potatowebkit")

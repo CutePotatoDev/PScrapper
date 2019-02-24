@@ -10,7 +10,7 @@ from multiprocessing import Queue
 from time import sleep
 import configparser
 from urlscollector import URLsCollector
-from webkit import WebKit
+from util.webkit import WebKit
 from grab.document import Document
 from items import Item
 from itemsdatacollector import IDCollector
@@ -86,7 +86,7 @@ def main():
         kit.poolsize = int(conf.params["webkit"]["threads"])
         kit.init()
 
-        kit.go(conf.params["common"]["loginurl"])
+        kit.go(conf.params["common"]["url"] + "/login")
         kit.registerContentLoadHandler(contentLoad)
         kit.pipe.get()
 

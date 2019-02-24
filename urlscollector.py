@@ -35,16 +35,16 @@ class URLsCollector(Thread):
         log.info("Exiting URL's collector.")
 
     def _login(self):
-        self._web.go(self._conf["loginurl"])
+        self._web.go(self._conf["loginurl"] + "/login")
         self._web.doc.set_input("_username", self._conf["username"])
         self._web.doc.set_input("_password", self._conf["password"])
         self._web.submit()
 
         if self._web.doc("//a[@class='dropdown-toggle username']").text() != self._conf["username"]:
-            log.info("Login failed: {}".format(self._conf["loginurl"]))
+            log.info("Login failed: {}".format(self._conf["loginurl"] + "/login"))
             return False
 
-        log.info("Login successful: {}".format(self._conf["loginurl"]))
+        log.info("Login successful: {}".format(self._conf["loginurl"] + "/login"))
         return True
 
     def _getMenuSubURLs(self, url):

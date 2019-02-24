@@ -1,11 +1,9 @@
 import logging
-import signal
 import queue
 from functools import partial
 from time import sleep, time
 from multiprocessing import Queue
-from threading import Thread, Event
-from PyQt5.QtCore import QUrl, pyqtSignal, QThread, QTimer
+from PyQt5.QtCore import QUrl, pyqtSignal, QThread
 from PyQt5.QtWebEngineWidgets import QWebEnginePage
 
 

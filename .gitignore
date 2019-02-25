@@ -1,5 +1,7 @@
 __pycache__/
+images/
 categories.json
 *.conf
 !*.sample.conf
 *.log
+*.csv

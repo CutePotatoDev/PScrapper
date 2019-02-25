@@ -17,7 +17,7 @@ from itemsdatacollector import IDCollector
 from writer import Writer
 
 log = logging.getLogger("PScrapper")
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 # logging.getLogger("potatowebkit").setLevel(logging.DEBUG)s
 

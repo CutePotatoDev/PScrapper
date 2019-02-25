@@ -54,16 +54,16 @@ class IDCollector(Thread):
         log.debug("Exiting items data collector.")
 
     def _login(self):
-        self._web.go(self._conf["loginurl"])
+        self._web.go(self._conf["url"] + "/login")
         self._web.doc.set_input("_username", self._conf["username"])
         self._web.doc.set_input("_password", self._conf["password"])
         self._web.submit()
 
         if self._web.doc("//a[@class='dropdown-toggle username']").text() != self._conf["username"]:
-            log.info("Login failed: {}".format(self._conf["loginurl"]))
+            log.info("Login failed: {}".format(self._conf["url"] + "/login"))
             return False
 
-        log.info("Login successful: {}".format(self._conf["loginurl"]))
+        log.info("Login successful: {}".format(self._conf["url"] + "/login"))
         return True
 
     def parseItemData(self, item):

@@ -22,7 +22,7 @@ class CSVWriter:
             writer = csv.writer(file, lineterminator=self.lineterminator, delimiter=self.delimiter)
 
             if self.fieldnames is not None and self.printheader:
-                writer.writerow(CSVWriter.fieldnames)
+                writer.writerow(self.fieldnames)
 
             for _, value in dict.items():
                 writer.writerow(list(value))

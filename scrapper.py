@@ -35,7 +35,8 @@ log.addHandler(sh)
 
 
 class Config():
-    def __init__(self):
+    def __init__(self, args=None):
+        self.args = args
         self.params = configparser.ConfigParser()
         self.params.read("./params.conf")
 
@@ -66,20 +67,21 @@ class Config():
         return out
 
 
-parser = argparse.ArgumentParser(description="Items scrapper.", formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+parser = argparse.ArgumentParser(description="Potato scrapper.", formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
+parser.add_argument("-sgs", "--subgroups_sep", default="|", dest="subgroupssep", help="Set separator for subgroups in output file.")
 parser.add_argument("-o", "--out", default="data.csv", metavar="FILENAME", dest="filename", help="Name of output file.")
 parser.add_argument("-h", "--help", action="help", default=argparse.SUPPRESS, help="Show this help message and exit.")
 args = parser.parse_args()
 
 
-conf = Config()
+conf = Config(args)
 
 
 def main():
-    csvwriter = items.CSVWriter(args.filename)
+    global conf
+    csvwriter = items.CSVWriter(conf.args.filename)
 
     try:
-        global conf
 
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         kit = WebKit(gui=False)

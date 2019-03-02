@@ -19,10 +19,10 @@ log = logging.getLogger("PScrapper")
 class Writer(Thread):
     def __init__(self, conf=None, name="Writer"):
         super(Writer, self).__init__(name=name)
+        self._conf = conf
 
-        self._conf = conf.params["writer"]
+        self._params = conf.params["writer"]
         self._prices = conf.catconf["prices"]
-        self._menudict = conf.menudict
 
         self.input = Queue()
         self.output = {}
@@ -36,7 +36,7 @@ class Writer(Thread):
         self._web = Grab(timeout=50, connect_timeout=50)
 
         # Translation setup from Danish to Sweden.
-        self._translate = Translator(from_lang="da", to_lang="sv", email=self._conf["email"])
+        self._translate = Translator(from_lang="da", to_lang="sv", email=self._params["email"])
 
         # Expression for special danish alphabet symbols.
         self._regex = re.compile("[ÆØÅæøå]|sort|brun|hvid|kerner", flags=re.IGNORECASE)
@@ -153,6 +153,8 @@ class Writer(Thread):
                 self.rpm = self._counter
                 self._counter = 0
 
+    # Set translates for menu-groups elements.
+    # Also manage subgroups separator. It's not correct place do it here but it's comfortable.
     def _menuTranslates(self, txt):
         # txtout = txt
         tmp = ""
@@ -162,12 +164,12 @@ class Writer(Thread):
 
             for i in range(len(elements)):
                 try:
-                    if self._menudict[elements[i]] is not "":
-                        tmp += self._menudict[elements[i]] + " | "
+                    if self._conf.menudict[elements[i]] is not "":
+                        tmp += self._conf.menudict[elements[i]] + " " + self._conf.args.subgroupssep + " "
                     else:
-                        tmp += value.split("|")[i] + " | "
+                        tmp += value.split("|")[i] + " " + self._conf.args.subgroupssep + " "
                 except KeyError:
-                    tmp += value.split("|")[i] + " | "
+                    tmp += value.split("|")[i] + " " + self._conf.args.subgroupssep + " "
 
         if tmp is not "":
             txtout = tmp[:-3]
@@ -206,10 +208,10 @@ class Writer(Thread):
 
         itemdata = json.loads(self._web.doc.body)
 
-        itemcount = itemdata["results"]["product"]["total"]
+        itemcount = len(itemdata["resources"]["product"]["items"])
 
         if itemcount is 0:
             return None
         else:
-            itemname = itemdata["results"]["product"]["hits"][0]["item"]["name"]
+            itemname = itemdata["resources"]["product"]["items"][0]["name"]
             return itemname

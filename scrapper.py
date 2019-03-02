@@ -3,7 +3,7 @@
 import logging
 import re
 import signal
-import items
+import util.csv
 import argparse
 import json
 from multiprocessing import Queue
@@ -79,7 +79,14 @@ conf = Config(args)
 
 def main():
     global conf
-    csvwriter = items.CSVWriter(conf.args.filename)
+
+    fields = [
+        'Name', 'Long name', 'Product price', 'Quantity', 'Model', "Product ID",
+        "Creation date", 'URL', 'EAN', 'Manufacturer name', 'Weight', 'TaxClassName',
+        'Product image', "Description", 'Categories name', 'INOROUROFSTOCK'
+    ]
+
+    csvwriter = util.csv.CSVWriter(conf.args.filename, fieldnames=fields)
 
     try:
 
@@ -136,7 +143,7 @@ def main():
 
             log.info("Items write RPM: {}".format(rpm))
 
-            csvwriter.writetoCSV(result.copy())
+            csvwriter.overwriteCSV(result.copy())
 
     except KeyboardInterrupt:
         log.warning("Oh my, keyboard interrupt. Exiting.")

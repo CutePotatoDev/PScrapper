@@ -70,4 +70,6 @@ echo -e "\e[36mRemoving sources.\e[0m"
 rm $(find ./ | grep ".py$")
 
 echo -e "\e[36mCreating archive.\e[0m"
-bandizip c -r -l:9 -y Scrapper.zip ./*
+githash=$(git log -1 --format="%h")
+echo -e "\e[36mBuild version: \e[35m$githash\e[36m.\e[0m"
+bandizip c -r -l:9 -y Scrapper\[build_$githash\].zip ./*

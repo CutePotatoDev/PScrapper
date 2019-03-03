@@ -6,6 +6,8 @@ import signal
 import util.csv
 import argparse
 import json
+import os
+import psutil
 from multiprocessing import Queue
 from time import sleep
 import configparser
@@ -137,13 +139,23 @@ def main():
             log.info("Items read RPM: {}".format(rpm))
             log.info("Items output queue size: {}".format(outpipe.qsize()))
 
-            rpm = 0
+            rpm1 = 0
             for wr in writers:
-                rpm += wr.rpm
+                rpm1 += wr.rpm
 
-            log.info("Items write RPM: {}".format(rpm))
+            log.info("Items write RPM: {}".format(rpm1))
 
             csvwriter.overwriteCSV(result.copy())
+
+            if kit.urlqueue.qsize() == 0 and kit.rpm == 0 and kit.pipe.qsize() == 0 and rpm == 0 and outpipe.qsize() == 0 and rpm1 == 0:
+                # Really bad variant just kill everything. But web kit have some bugs and not want exit easy.
+                # And now i don't have much time to fix it nicely.
+                # TODO: Fix web kit when it's be possible.
+
+                parent = psutil.Process(os.getpid())
+                for child in parent.children(recursive=True):
+                    child.kill()
+                parent.kill()
 
     except KeyboardInterrupt:
         log.warning("Oh my, keyboard interrupt. Exiting.")

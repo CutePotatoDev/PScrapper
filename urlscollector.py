@@ -40,8 +40,8 @@ class URLsCollector(Thread):
         self._web.doc.set_input("_password", self._conf["password"])
         self._web.submit()
 
-        if self._web.doc("//a[@class='dropdown-toggle username']").text() != self._conf["username"]:
-            log.info("Login failed: {}".format(self._conf["url"] + "/login"))
+        if self._web.doc("//a[@class='dropdown-toggle username']").count() != 2:
+            log.error("Login failed: {}".format(self._conf["url"] + "/login"))
             return False
 
         log.info("Login successful: {}".format(self._conf["url"] + "/login"))

@@ -136,7 +136,8 @@ class IDCollector(Thread):
 
                 # Check or description have table structure. If not ignore it.
                 if descriptiontable.select("./table[contains(@class, 'table')]").count() != 0:
-                    item.description = descriptiontable.inner_html().replace("\n", "")
+                    # Clean carriage return and line feed characters, they are corrupting CSV file.
+                    item.description = descriptiontable.inner_html().replace("\n", "").replace("\r", "")
                 else:
                     log.debug("SKU: [{}] has no table style description.".format(item.sku))
 

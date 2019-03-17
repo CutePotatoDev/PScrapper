@@ -113,6 +113,10 @@ class Writer(Thread):
                 if item.manufacturer == "Direct Computer Supplies":
                     item.manufacturer = "Mr.PC"
 
+                for rep in (("DCS", ""), ("DCS ApS", "")):
+                    item.itemshortname = item.itemshortname.replace(*rep)
+                    item.itemlongname = item.itemlongname.replace(*rep)
+
                 itemcolor = None
                 for color in self._colors:
                     if color in item.itemshortname.lower():
@@ -208,10 +212,10 @@ class Writer(Thread):
 
         itemdata = json.loads(self._web.doc.body)
 
-        itemcount = len(itemdata["resources"]["product"]["items"])
+        itemcount = len(itemdata["results"]["product"]["hits"])
 
         if itemcount is 0:
             return None
         else:
-            itemname = itemdata["resources"]["product"]["items"][0]["name"]
+            itemname = itemdata["results"]["product"]["hits"][0]["item"]["name"]
             return itemname

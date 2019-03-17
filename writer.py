@@ -76,7 +76,11 @@ class Writer(Thread):
                         if path.exists("images/" + name) is False:
                             self._web.download(item.image, "images/" + name)
 
-                        item.image = str(os.getcwd()) + "\\images\\" + name
+                        if self._conf.args.outputformat == "standart":
+                            item.image = str(os.getcwd()) + "\\images\\" + name
+                        elif self._conf.args.outputformat == "shopify":
+                            item.image = "https://nordentobak.se/wp/wp-content/uploads/scraped/" + name
+
                     except GrabCouldNotResolveHostError:
                         log.error("Item image host not resolved. SKU: {}, image: {}".format(item.sku, item.image))
 
@@ -113,6 +117,9 @@ class Writer(Thread):
                 if item.manufacturer == "Direct Computer Supplies":
                     item.manufacturer = "Mr.PC"
 
+                item.itemshortname = item.itemshortname.replace("DCS", "")
+                item.itemlongname = item.itemlongname.replace("DCS", "")
+
                 itemcolor = None
                 for color in self._colors:
                     if color in item.itemshortname.lower():
@@ -134,6 +141,19 @@ class Writer(Thread):
 
                     if itemcolor is not None:
                         item.itemshortname += itemcolor
+
+                # extra changes when scrapping for shopify engine.
+                if self._conf.args.outputformat == "shopify":
+                    for key, val in enumerate(item.subcategory.split("|")):
+
+                        # set collection as main menu name.
+                        if key == 0:
+                            item.collection = val.strip()
+                        else:
+                            item.tags += val.strip() + ", "
+
+                    # Remove excess symbols from items end.
+                    item.tags = item.tags[:-2]
 
                 if item.sku not in self.output:
                     self.output[item.sku] = item
@@ -208,10 +228,10 @@ class Writer(Thread):
 
         itemdata = json.loads(self._web.doc.body)
 
-        itemcount = len(itemdata["resources"]["product"]["items"])
+        itemcount = len(itemdata["results"]["product"]["hits"])
 
         if itemcount is 0:
             return None
         else:
-            itemname = itemdata["resources"]["product"]["items"][0]["name"]
+            itemname = itemdata["results"]["product"]["hits"][0]["item"]["name"]
             return itemname

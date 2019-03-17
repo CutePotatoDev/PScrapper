@@ -14,7 +14,7 @@ import configparser
 from urlscollector import URLsCollector
 from util.webkit import WebKit
 from grab.document import Document
-from items import Item
+from items import Fields, DCSItem, ShopifyItem
 from itemsdatacollector import IDCollector
 from writer import Writer
 
@@ -71,6 +71,8 @@ class Config():
 
 parser = argparse.ArgumentParser(description="Potato scrapper.", formatter_class=argparse.ArgumentDefaultsHelpFormatter, add_help=False)
 parser.add_argument("-sgs", "--subgroups_sep", default="|", dest="subgroupssep", help="Set separator for subgroups in output file.")
+parser.add_argument("-of", "--output_format", default="standart", choices=["standart", "shopify"],
+                    dest="outputformat", help="Set separator for subgroups in output file.")
 parser.add_argument("-o", "--out", default="data.csv", metavar="FILENAME", dest="filename", help="Name of output file.")
 parser.add_argument("-h", "--help", action="help", default=argparse.SUPPRESS, help="Show this help message and exit.")
 args = parser.parse_args()
@@ -82,13 +84,11 @@ conf = Config(args)
 def main():
     global conf
 
-    fields = [
-        'Name', 'Long name', 'Product price', 'Quantity', 'Model', "Product ID",
-        "Creation date", 'URL', 'EAN', 'Manufacturer name', 'Weight', 'TaxClassName',
-        'Product image', "Description", 'Categories name', 'INOROUROFSTOCK'
-    ]
-
-    csvwriter = util.csv.CSVWriter(conf.args.filename, fieldnames=fields)
+    if conf.args.outputformat == "standart":
+        csvwriter = util.csv.CSVWriter(conf.args.filename, fieldnames=Fields.DCS, delimiter=",")
+    elif conf.args.outputformat == "shopify":
+        csvwriter = util.csv.CSVWriter(conf.args.filename, fieldnames=Fields.SHOPIFY, delimiter=",")
+        csvwriter.splitfile = True
 
     try:
 
@@ -145,7 +145,7 @@ def main():
 
             log.info("Items write RPM: {}".format(rpm1))
 
-            csvwriter.overwriteCSV(result.copy())
+            csvwriter.dumpDict(result.copy())
 
             if kit.urlqueue.qsize() == 0 and kit.rpm == 0 and kit.pipe.qsize() == 0 and rpm == 0 and outpipe.qsize() == 0 and rpm1 == 0:
                 # Really bad variant just kill everything. But web kit have some bugs and not want exit easy.
@@ -200,7 +200,12 @@ def toHTMLStockParse(page, html):
     doc.parse()
 
     for item in doc.select("//div[@class='product-grid']"):
-        itemobj = Item()
+        itemtype = {
+            "standart": DCSItem,
+            "shopify": ShopifyItem
+        }
+
+        itemobj = itemtype[conf.args.outputformat]()
 
         itemobj.url = item.select("./div[@class='product-grid-item-content']/h2[@itemprop='name']/a/@href").text()
         itemobj.sku = item.select("./div[@class='product-grid-item-content']/ul//i[@itemprop='sku']").text()

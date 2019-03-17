@@ -95,7 +95,7 @@ class IDCollector(Thread):
             except DataNotFound as ex:
                 log.warning("SKU: [{}] has no price.".format(item.sku))
 
-            item.manufacturernumber = self._web.doc("//i[@itemprop='model']").text()
+            item.manufacturernumber = self._web.doc("//i[@itemprop='model']/@title").text()
 
             eancode = self._web.doc("//i[@itemprop='ean']/@title")
             if eancode.count() != 0:

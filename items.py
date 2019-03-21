@@ -16,7 +16,7 @@ class Item:
         self.manufacturer = None
         self.weight = None
         # self.taxclass = "SV"
-        self.image = None
+        self.image = []
         self.description = None
         self.subcategory = None
         # self.instock = 1
@@ -34,7 +34,7 @@ class Item:
                      self.manufacturer,         # "Manufacturer name"
                      self.weight,               # "Weight"
                      "SV",                      # "TaxClassName"
-                     self.image,                # "Product image"
+                     ", ".join(self.image),     # "Product image"
                      self.description,          # "Description"
                      self.subcategory,          # "Categories name"
                      1                          # "INOROUROFSTOCK"

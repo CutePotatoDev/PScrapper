@@ -68,17 +68,18 @@ class Writer(Thread):
             try:
                 item = self.input.get(timeout=self._sleeptime)
 
-                # Set image location.
-                if item.image is not None:
+                # Download images and set their names to CSV.
+                for key, img in enumerate(item.image):
                     try:
-                        name = item.image.split("/")[-1]
+                        # Get image name.
+                        name = img.split("/")[-1]
 
                         if path.exists("images/" + name) is False:
-                            self._web.download(item.image, "images/" + name)
+                            self._web.download(img, "images/" + name)
 
-                        item.image = str(os.getcwd()) + "\\images\\" + name
+                        item.image[key] = name
                     except GrabCouldNotResolveHostError:
-                        log.error("Item image host not resolved. SKU: {}, image: {}".format(item.sku, item.image))
+                        log.error("Item image host not resolved. SKU: {}, image: {}".format(item.sku, img))
 
                 for key, value in item.subcategory.items():
                     elements = key.split("|")
@@ -110,7 +111,7 @@ class Writer(Thread):
                     json_data.close()
 
                 # Manufacturer name fix.
-                if item.manufacturer == "Direct Computer Supplies":
+                if item.manufacturer == "Direct Computer Supplies" or item.manufacturer == "DCS ApS":
                     item.manufacturer = "Mr.PC"
 
                 for rep in (("DCS", ""), ("DCS ApS", "")):

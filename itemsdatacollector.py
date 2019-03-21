@@ -110,23 +110,29 @@ class IDCollector(Thread):
             if weight.count() != 0:
                 item.weight = weight.text().replace(" kg", "")
 
+            # Collecting images.
             try:
                 image = self._web.doc("//div[@class='images']//li[@data-id='0']/@data-original-url")
                 if image.count() == 0:
                     tag = self._web.doc("//div[@class='images']//div[@class='mainimage']/href")
 
                     if tag.count() == 0:
+                        # Standard images from carousel.
                         tag = self._web.doc("//div[@class='images']//div[@class='product-lightbox-carousel']//img/@src")
 
+                        # No image, take empty image icon.
                         if tag.count() == 0:
-                            item.image = "https://cdn.cnetcontent.com/a9/c5/a9c59a19-56a8-43f6-bdf6-b33a703a328f.jpg"
+                            item.image.append("https://cdn.cnetcontent.com/a9/c5/a9c59a19-56a8-43f6-bdf6-b33a703a328f.jpg")
 
-                    if tag.text().startswith("https://") or tag.text().startswith("http://"):
-                        item.image = tag.text()
-                    else:
-                        item.image = "https://dev.dcs.dk" + tag.text()
+                    for img in tag:
+                        img = img.text()
+
+                        if img.startswith("https://") or img.startswith("http://"):
+                            item.image.append(img)
+                        else:
+                            item.image.append("https://dev.dcs.dk" + img)
                 else:
-                    item.image = image.text()
+                    item.image.append(image.text())
 
             except DataNotFound as ex:
                 log.warning("SKU: [{}] has no image.".format(item.sku))

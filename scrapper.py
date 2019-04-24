@@ -54,7 +54,7 @@ class Config():
         log.debug("Load categories url's configuration file.")
 
         with open("categories.json", "r", encoding="UTF-8") as json_data:
-            tmp = json.loads(re.sub("^//.*", "", json_data.read(), flags=re.MULTILINE))
+            tmp = json.loads(re.sub("^ *//.*", "", json_data.read(), flags=re.MULTILINE))
 
             out["categories"] = tmp["categories"]
             out["noskip"] = [*tmp["translations"]]

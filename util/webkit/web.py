@@ -4,7 +4,7 @@ from functools import partial
 from time import sleep, time
 from multiprocessing import Queue
 from PyQt5.QtCore import QUrl, pyqtSignal, QThread
-from PyQt5.QtWebEngineWidgets import QWebEnginePage
+from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineProfile
 
 
 log = logging.getLogger("potatowebkit")
@@ -14,7 +14,10 @@ class WebPage(QWebEnginePage):
     gosig = pyqtSignal(QUrl)
 
     def __init__(self):
-        QWebEnginePage.__init__(self)
+        self.profile = QWebEngineProfile()
+        self.profile.setHttpUserAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0")
+
+        super(WebPage, self).__init__(self.profile)
 
         self.loadFinished.connect(self.loadCompleted)
         self.gosig.connect(self.load)

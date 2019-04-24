@@ -1,7 +1,7 @@
 import logging
 import queue
 from threading import Thread
-from time import time
+from time import time, sleep
 from grab import Grab
 from multiprocessing import Queue
 from weblib.error import DataNotFound
@@ -17,13 +17,13 @@ class IDCollector(Thread):
 
         self._conf = conf.params["common"]
 
-        self._sleeptime = 0.5
+        self._sleeptime = 0.75
 
         self._starttime = time()
         self._counter = 0
         self.rpm = 0
 
-        self._web = Grab(timeout=50, connect_timeout=50)
+        self._web = Grab(timeout=50, connect_timeout=50, user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0")
 
         self.input = Queue()
         self.output = Queue()
@@ -49,7 +49,7 @@ class IDCollector(Thread):
                     self.rpm = self._counter
                     self._counter = 0
 
-                # sleep(self._sleeptime)
+                sleep(self._sleeptime)
 
         log.debug("Exiting items data collector.")
 
@@ -146,6 +146,12 @@ class IDCollector(Thread):
                     item.description = descriptiontable.inner_html().replace("\n", "").replace("\r", "")
                 else:
                     log.debug("SKU: [{}] has no table style description.".format(item.sku))
+                    # Try get description info from tab 1.
+                    descriptiontable = self._web.doc("//div[@id='tab_1']")
+
+                    if descriptiontable.select("./table[contains(@class, 'table')]").count() != 0:
+                        # Clean carriage return and line feed characters, they are corrupting CSV file.
+                        item.description = descriptiontable.inner_html().replace("\n", "").replace("\r", "")
 
             except DataNotFound as ex:
                 log.warning("SKU: [{}] has no description.".format(item.sku))

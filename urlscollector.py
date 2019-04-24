@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 from threading import Thread
 from grab import Grab
 from multiprocessing import Queue
@@ -15,9 +16,9 @@ class URLsCollector(Thread):
         self._categories = conf.catconf["categories"]
         self._noskip = conf.catconf["noskip"]
 
-        self._sleeptime = 0.5
+        self._sleeptime = 1
 
-        self._web = Grab(timeout=50, connect_timeout=50)
+        self._web = Grab(timeout=70, connect_timeout=70, user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0")
 
         self.urlqueue = Queue()
 
@@ -63,6 +64,7 @@ class URLsCollector(Thread):
 
         for subcat in listt:
             results = self._getMenuSubURLs(subcat.text())
+            sleep(self._sleeptime)
 
             if results is not None:
                 for result in results:

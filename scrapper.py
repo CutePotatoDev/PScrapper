@@ -83,9 +83,9 @@ def main():
     global conf
 
     fields = [
-        'Name', 'Long name', 'Product price', 'Quantity', 'Model', "Product ID",
-        "Creation date", 'URL', 'EAN', 'Manufacturer name', 'Weight', 'TaxClassName',
-        'Product image', "Description", 'Categories name', 'INOROUROFSTOCK'
+        'Name', 'Long name', 'Product price', 'Quantity', "Product ID",
+        'modelnr', 'EAN', 'Manufacturer name', 'Weight',
+        'Product image', "Description", 'Categories name'
     ]
 
     csvwriter = util.csv.CSVWriter(conf.args.filename, fieldnames=fields)

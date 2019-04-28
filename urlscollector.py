@@ -52,10 +52,10 @@ class URLsCollector(Thread):
         global noskip
 
         # Unknown stuff, need to check.
-        if "tver/fladskaerm" in url:
-            self._web.go(url + "?tb[stock]=allproducts")
-        else:
-            self._web.go(url + "?tb[limit]=96")
+        # if "tver/fladskaerm" in url:
+        #     self._web.go(url + "?tb[stock]=allproducts")
+        # else:
+        self._web.go(url + "?tb[limit]=96")
 
         listt = self._web.doc("//li[@class='lvl-childrens']/a/@href")
         lasturl = self._web.doc("//li[@class='last  ']/a/@href")
@@ -82,10 +82,10 @@ class URLsCollector(Thread):
 
         if len(listt) == 0:
             for page in range(1, int(maxpage) + 1):
-                if "tver/fladskaerm" in url:
-                    urls.append(url + "?page=" + str(page) + "&tb[stock]=allproducts")
-                else:
-                    urls.append(url + "?tb[limit]=96&page=" + str(page))
+                # if "tver/fladskaerm" in url:
+                #     urls.append(url + "?page=" + str(page) + "&tb[stock]=allproducts")
+                # else:
+                urls.append(url + "?tb[limit]=96&page=" + str(page))
 
         if len(urls) is not 0:
             return urls

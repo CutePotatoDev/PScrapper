@@ -67,15 +67,15 @@ class IDCollector(Thread):
         return True
 
     def parseItemData(self, item):
-        try:
-            tvs = self._web.doc("//ol[@class='breadcrumb']/li/a[contains(@href, '/sv/category/fototelefonigps/audioogvideo/tver/')]/@href").text()
-        except (DataNotFound, IndexError):
-            tvs = ""
+        # try:
+        #     tvs = self._web.doc("//ol[@class='breadcrumb']/li/a[contains(@href, '/sv/category/fototelefonigps/audioogvideo/tver/')]/@href").text()
+        # except (DataNotFound, IndexError):
+        #     tvs = ""
 
         if item.stockvalue == 0:
             log.warn("SKU: [{}] not in stock.".format(item.sku))
 
-        if "tver/fladskaerm" in tvs or item.stockvalue != 0:
+        if item.stockvalue != 0:
 
             itemshortname = self._web.doc("//h1[@itemprop='name']")
             if itemshortname.count() != 0:

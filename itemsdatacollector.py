@@ -17,7 +17,7 @@ class IDCollector(Thread):
 
         self._conf = conf.params["common"]
 
-        self._sleeptime = 0.75
+        self._sleeptime = 2
 
         self._starttime = time()
         self._counter = 0
@@ -31,25 +31,33 @@ class IDCollector(Thread):
     def run(self):
         log.info("Starting items data collector.")
 
-        if self._login():
-            while True:
-                try:
-                    item = self.input.get(timeout=self._sleeptime)
+        try:
+            if self._login():
+                while True:
+                    try:
+                        item = self.input.get(timeout=self._sleeptime)
 
-                    if item is not None:
-                        self._web.go(item.url)
-                        self.parseItemData(item)
-                        self._counter += 1
+                        if item is not None:
+                            try:
+                                self._web.go(item.url)
+                                self.parseItemData(item)
+                                self._counter += 1
+                            except Exception as ex:
+                                sleep(40)
+                                log.error(ex)
 
-                except queue.Empty:
-                    pass
+                    except queue.Empty:
+                        pass
 
-                if (time() - self._starttime) >= 60:
-                    self._starttime = time()
-                    self.rpm = self._counter
-                    self._counter = 0
+                    if (time() - self._starttime) >= 60:
+                        self._starttime = time()
+                        self.rpm = self._counter
+                        self._counter = 0
 
-                sleep(self._sleeptime)
+                    sleep(self._sleeptime)
+
+        except Exception as ex:
+            log.error(ex)
 
         log.debug("Exiting items data collector.")
 

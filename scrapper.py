@@ -16,6 +16,7 @@ from util.webkit import WebKit
 from grab.document import Document
 from items import Item
 from itemsdatacollector import IDCollector
+# from tagsdatacollector import TagsCollector, loadTags
 from writer import Writer
 
 log = logging.getLogger("PScrapper")
@@ -126,9 +127,26 @@ def main():
             writer.start()
             writers.append(writer)
 
+        tagsdata = []
+        tags = []
+
+        # for i in range(16):
+        #     tag = TagsCollector(conf, name="TgCollector-" + str(i))
+        #     tag.input = urlcollector.tagsqueue
+        #     tag.output = tagsdata
+        #     tag.start()
+        #     tags.append(tag)
+
         while True:
             sleep(60)
-            log.info("Pages URL's queue size: {}".format(kit.urlqueue.qsize()))
+            log.info("Pages URL's queue size: {}".format(urlcollector.urlqueue.qsize()))
+            log.info("Tags queue size: {}".format(urlcollector.tagsqueue.qsize()))
+
+            rpm2 = 0
+            for col in tags:
+                rpm2 += col.rpm
+
+            log.info("Tags RPM: {}".format(rpm2))
             log.info("Initial items read Page/min.: {}".format(kit.rpm))
             log.info("Items input queue size: {}".format(kit.pipe.qsize()))
 
@@ -145,9 +163,10 @@ def main():
 
             log.info("Items write RPM: {}".format(rpm1))
 
+            # result = loadTags(tagsdata, result)
             csvwriter.overwriteCSV(result.copy())
 
-            if kit.urlqueue.qsize() == 0 and kit.rpm == 0 and kit.pipe.qsize() == 0 and rpm == 0 and outpipe.qsize() == 0 and rpm1 == 0:
+            if urlcollector.urlqueue.qsize() == 0 and kit.rpm == 0 and kit.pipe.qsize() == 0 and rpm == 0 and outpipe.qsize() == 0 and rpm1 == 0:
                 # Really bad variant just kill everything. But web kit have some bugs and not want exit easy.
                 # And now i don't have much time to fix it nicely.
                 # TODO: Fix web kit when it's be possible.
@@ -219,7 +238,7 @@ def toHTMLStockParse(page, html):
             else:
                 itemobj.stockvalue = stkvalue
 
-        page.pipe.put(itemobj)
+            page.pipe.put(itemobj)
 
 
 def checkRez(page, rez):

@@ -27,7 +27,7 @@ class Writer(Thread):
         self.input = Queue()
         self.output = {}
 
-        self._sleeptime = 0.5
+        self._sleeptime = 1
 
         self._starttime = time.time()
         self._counter = 0
@@ -211,12 +211,17 @@ class Writer(Thread):
             log.error("Get timeout from prisjakt.nu.")
             return None
 
-        itemdata = json.loads(self._web.doc.body)
+        try:
+            itemdata = json.loads(self._web.doc.body)
 
-        itemcount = len(itemdata["results"]["product"]["hits"])
+            itemcount = len(itemdata["results"]["product"]["hits"])
 
-        if itemcount is 0:
+            if itemcount is 0:
+                return None
+            else:
+                itemname = itemdata["results"]["product"]["hits"][0]["item"]["name"]
+                return itemname
+        except Exception as ex:
+            log.error("Incorrect data received from prisjakt.nu.")
+            time.sleep(25)
             return None
-        else:
-            itemname = itemdata["results"]["product"]["hits"][0]["item"]["name"]
-            return itemname

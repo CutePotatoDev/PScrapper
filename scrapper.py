@@ -200,8 +200,9 @@ def contentLoad(page):
         items = page.countElementsByClassName("product-grid-item-content", checkRez)
 
         if items == page.countElementsByClassName("dot", checkRez):
-            page.toHtml(toHTMLStockParse)
-            return True
+            if page.countElementsByClassName("price-novat", checkRez) > 0:
+                page.toHtml(toHTMLStockParse)
+                return True
     return False
 
 

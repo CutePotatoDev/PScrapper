@@ -10,6 +10,7 @@ from PyQt5.QtNetwork import QNetworkProxy
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 
 
 log = logging.getLogger("potatowebkit")
@@ -113,6 +114,7 @@ class WebKitProcess(Process):
 
             for web in self._pool:
                 view = QWebEngineView()
+                view.settings().setAttribute(QWebEngineSettings.WebGLEnabled, False)
                 view.setPage(web)
                 self.mv.addTab(view, web.title())
 

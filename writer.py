@@ -125,14 +125,14 @@ class Writer(Thread):
 
                 newname = self._search(item.eancode)
                 if newname is None:
-                    newname = self._search(item.manufacturernumber)
-                    if newname is not None:
-                        item.itemshortname = newname
+                    # newname = self._search(item.manufacturernumber)
+                    # if newname is not None:
+                        # item.itemshortname = newname
 
-                        if itemcolor is not None:
-                            item.itemshortname += itemcolor
-                    else:
-                        pass
+                    if itemcolor is not None:
+                        item.itemshortname += itemcolor
+                    # else:
+                        # pass
                         # log.debug("SKU: [{}] has not found on prisjakt.nu.".format(item.sku))
                 else:
                     item.itemshortname = newname
@@ -148,10 +148,12 @@ class Writer(Thread):
                 self._counter += 1
                 time.sleep(self._sleeptime)
 
-            except GrabTimeoutError as ex:
+            except GrabTimeoutError:
                 log.error("Item image get timeout. SKU: {}, image: {}".format(item.sku, item.image))
             except queue.Empty:
                 pass
+            except Exception as ex:
+                log.error(ex)
 
             if (time.time() - self._starttime) >= 60:
                 self._starttime = time.time()
@@ -170,6 +172,9 @@ class Writer(Thread):
             for i in range(len(elements)):
                 try:
                     if self._conf.menudict[elements[i]] is not "":
+                        if self._conf.menudict[elements[i]] is None:
+                            continue
+
                         tmp += self._conf.menudict[elements[i]] + " " + self._conf.args.subgroupssep + " "
                     else:
                         tmp += value.split("|")[i] + " " + self._conf.args.subgroupssep + " "

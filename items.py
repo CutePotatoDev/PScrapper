@@ -21,6 +21,9 @@ class Item:
         self.subcategory = None
         # self.instock = 1
 
+        self.tagsdict = {}
+        self.tags = []
+
     def __iter__(self):
         return iter([self.itemshortname,        # "Name"
                      self.itemlongname,         # "Long name"
@@ -38,4 +41,4 @@ class Item:
                      self.description,          # "Description"
                      self.subcategory           # "Categories name"
                      # 1                          # "INOROUROFSTOCK"
-                     ])
+                     ] + self.tags)

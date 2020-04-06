@@ -62,7 +62,7 @@ class IDCollector(Thread):
         log.debug("Exiting items data collector.")
 
     def _login(self):
-        self._web.go(self._conf["url"] + "/login")
+        self._web.go(self._conf["url"] + "/en/login")
         self._web.doc.set_input("_username", self._conf["username"])
         self._web.doc.set_input("_password", self._conf["password"])
         self._web.submit()
@@ -138,7 +138,7 @@ class IDCollector(Thread):
                         if img.startswith("https://") or img.startswith("http://"):
                             item.image.append(img)
                         else:
-                            item.image.append("https://dev.dcs.dk" + img)
+                            item.image.append("https://dcs.dk" + img)
                 else:
                     item.image.append(image.text())
 

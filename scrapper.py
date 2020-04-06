@@ -16,15 +16,17 @@ from util.webkit import WebKit
 from grab.document import Document
 from items import Item
 from itemsdatacollector import IDCollector
-# from tagsdatacollector import TagsCollector, loadTags
+from tagsdatacollector import TagsCollector, loadTags
 from writer import Writer
+
+# pip install psutil grab lxml PyQt5 PyQtWebEngine translate textblob pycurl
 
 log = logging.getLogger("PScrapper")
 log.setLevel(logging.INFO)
 
 # logging.getLogger("potatowebkit").setLevel(logging.DEBUG)s
 
-fformatter = logging.Formatter("%(asctime)s %(threadName)-13s %(levelname)-7s %(message)s")
+fformatter = logging.Formatter("%(asctime)s %(threadName)-13s %(lineno)-3d %(levelname)-7s %(message)s")
 fhandler = logging.FileHandler("scrapper.log")
 fhandler.setFormatter(fformatter)
 fhandler.setLevel(logging.DEBUG)
@@ -32,7 +34,7 @@ log.addHandler(fhandler)
 
 sh = logging.StreamHandler()
 sh.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s %(threadName)-13s %(levelname)-7s %(message)s")
+formatter = logging.Formatter("%(asctime)s %(threadName)-13s %(lineno)-3d %(levelname)-7s %(message)s")
 sh.setFormatter(formatter)
 log.addHandler(sh)
 
@@ -44,7 +46,8 @@ class Config():
         self.params.read("./params.conf")
 
         self.menudict = {
-            "/sv/category": "Hem"
+            # "/sv/category": "Hem",
+            "/en/category": None
         }
 
         self.catconf = self.categoriesConfLoad()
@@ -98,7 +101,7 @@ def main():
         kit.poolsize = int(conf.params["webkit"]["threads"])
         kit.init()
 
-        kit.go(conf.params["common"]["url"] + "/login")
+        kit.go(conf.params["common"]["url"] + "/en/login")
         kit.registerContentLoadHandler(contentLoad)
         kit.pipe.get()
 
@@ -130,12 +133,12 @@ def main():
         tagsdata = []
         tags = []
 
-        # for i in range(16):
-        #     tag = TagsCollector(conf, name="TgCollector-" + str(i))
-        #     tag.input = urlcollector.tagsqueue
-        #     tag.output = tagsdata
-        #     tag.start()
-        #     tags.append(tag)
+        for i in range(5):
+            tag = TagsCollector(conf, name="TgCollector-" + str(i))
+            tag.input = urlcollector.tagsqueue
+            tag.output = tagsdata
+            # tag.start()
+            # tags.append(tag)
 
         while True:
             sleep(60)
@@ -163,13 +166,25 @@ def main():
 
             log.info("Items write RPM: {}".format(rpm1))
 
-            # result = loadTags(tagsdata, result)
-            csvwriter.overwriteCSV(result.copy())
+            result1, tagnames = loadTags(tagsdata, result.copy())
+            csvwriter.fieldnames = fields + tagnames
+            csvwriter.overwriteCSV(result1)
 
             if urlcollector.urlqueue.qsize() == 0 and kit.rpm == 0 and kit.pipe.qsize() == 0 and rpm == 0 and outpipe.qsize() == 0 and rpm1 == 0:
                 # Really bad variant just kill everything. But web kit have some bugs and not want exit easy.
                 # And now i don't have much time to fix it nicely.
                 # TODO: Fix web kit when it's be possible.
+
+                # if urlcollector.tagsqueue.qsize() != 0 and rpm2 != 0:
+                #     if len(tags) != 10:
+                #         for i in range(10 - len(tags)):
+                #             tag = TagsCollector(conf, name="TCollector-" + str(i))
+                #             tag.input = urlcollector.tagsqueue
+                #             tag.output = tagsdata
+                #             tag.start()
+                #             tags.append(tag)
+                #     continue
+
 
                 parent = psutil.Process(os.getpid())
                 for child in parent.children(recursive=True):
@@ -188,11 +203,11 @@ login = False
 def contentLoad(page):
     global login
 
-    if "/login" in page.URL and not login:
+    if "/en/login" in page.URL and not login:
         page.checkElementById("login_form", loginResult)
         login = True
 
-    elif "/da/home" in page.URL:
+    elif "/en/home" in page.URL:
         page.pipe.put(None)
         return True
 
@@ -200,7 +215,8 @@ def contentLoad(page):
         items = page.countElementsByClassName("product-grid-item-content", checkRez)
 
         if items == page.countElementsByClassName("dot", checkRez):
-            if page.countElementsByClassName("price-novat", checkRez) > 0:
+            prices = page.countElementsByClassName("price-novat", checkRez)
+            if prices is not None and prices > 0 or items == 0:
                 page.toHtml(toHTMLStockParse)
                 return True
     return False
@@ -230,7 +246,11 @@ def toHTMLStockParse(page, html):
         if green == 0:
             itemobj.stockvalue = 0
         else:
-            stkvalue = item.select("./div[@class='stockstatus']/ul[@class='list-unstyled stocktext']/li")[0].text().strip().split(" stk")[0]
+            text = item.select("./div[@class='stockstatus']/ul[@class='list-unstyled stocktext']/li")[0].text().strip()
+            if "stk" in text:
+                stkvalue = text.split(" stk")[0]
+            elif "pcs" in text:
+                stkvalue = text.split(" pcs")[0]
 
             if "+" in stkvalue:
                 itemobj.stockvalue = stkvalue.replace("+", "")

@@ -30,11 +30,15 @@ class URLsCollector(Thread):
         try:
             if self._login():
                 for url in self._categories:
-                    results = self._getMenuSubURLs(url)
+                    try:
+                        results = self._getMenuSubURLs(url)
 
-                    if results is not None:
-                        for result in results:
-                            self.urlqueue.put(result)
+                        if results is not None:
+                            for result in results:
+                                self.urlqueue.put(result)
+                    except Exception as ex:
+                        log.error(ex)
+                        sleep(40)
 
         except Exception as ex:
             log.error(ex)
@@ -42,7 +46,7 @@ class URLsCollector(Thread):
         log.info("Exiting URL's collector.")
 
     def _login(self):
-        self._web.go(self._conf["url"] + "/login")
+        self._web.go(self._conf["url"] + "/en/login")
         self._web.doc.set_input("_username", self._conf["username"])
         self._web.doc.set_input("_password", self._conf["password"])
         self._web.submit()
@@ -86,7 +90,7 @@ class URLsCollector(Thread):
         else:
             maxpage = 1
 
-        if url not in self._noskip:
+        if url.replace("https://dcs.dk", "") not in self._noskip:
             log.info("Skip URL: {}.".format(url))
         else:
             if len(listt) == 0:
